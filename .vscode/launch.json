@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "configurations": [
+    {
+      "name": "TS-Node",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "${env:NVM_BIN}/ts-node",
+      "runtimeArgs": ["--transpile-only", "--esm"],
+      "program": "${file}",
+      "cwd": "${workspaceRoot}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"]
+    }
+  ]
+}
