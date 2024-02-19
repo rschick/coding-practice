@@ -1,6 +1,12 @@
 go 1.22.0
 
 use (
+	./buffered-channels
+	./channels
+	./exercise-equivalent-binary-tree
+	./exercise-web-crawler
+	./goroutines
 	./greetings
 	./hello
+	./range-and-close
 )
