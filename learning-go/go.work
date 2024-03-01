@@ -9,4 +9,5 @@ use (
 	./greetings
 	./hello
 	./range-and-close
+	./unique-shapes-in-matrix
 )

@@ -12,7 +12,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 type matrix [][]int
 
@@ -28,11 +31,36 @@ type shape struct {
 
 func (s shape) String() string {
 	var str string
-	var first = s.points[0]
 	for _, p := range s.points {
-		str += fmt.Sprintf("%v ", p.subtract(first))
+		str += fmt.Sprintf("%v ", p)
 	}
 	return str
+}
+
+func (s shape) Origin() point {
+	var origin = s.points[0]
+	for _, p := range s.points {
+		if p[0] < origin[0] {
+			origin = p
+		} else if p[1] < origin[1] {
+			origin = p
+		}
+	}
+	return origin
+}
+
+// Normalizes the shape so it starts at the origin and is sorted
+func (s shape) Normalize() shape {
+	origin := s.Origin()
+
+	var normalized = shape{}
+	for _, p := range s.points {
+		normalized.points = append(normalized.points, p.subtract(origin))
+	}
+
+	sort.Sort(normalized)
+
+	return normalized
 }
 
 func (s shape) Rotate90() shape {
@@ -42,6 +70,19 @@ func (s shape) Rotate90() shape {
 		rotated.points = append(rotated.points, point{p[1] - first[1], -p[0] + first[0]})
 	}
 	return rotated
+}
+
+// Implement sort.Interface such that points are sorted
+// by row and by column within each row
+func (s shape) Len() int      { return len(s.points) }
+func (s shape) Swap(i, j int) { s.points[i], s.points[j] = s.points[j], s.points[i] }
+func (s shape) Less(i, j int) bool {
+	if s.points[i][0] < s.points[j][0] {
+		return true
+	} else if s.points[i][0] == s.points[j][0] {
+		return s.points[i][1] < s.points[j][1]
+	}
+	return false
 }
 
 func (m matrix) Rotate90() matrix {
@@ -111,7 +152,7 @@ func countShapes(input matrix, allowRotation bool) int {
 	for row := range input {
 		for col := range input[row] {
 			if input[row][col] == 1 && !visited[point{row, col}] {
-				shape := buildShape(row, col)
+				shape := buildShape(row, col).Normalize()
 
 				if !shapesIndex[shape.String()] {
 					// add original shape to the shapes index
@@ -119,9 +160,9 @@ func countShapes(input matrix, allowRotation bool) int {
 
 					if allowRotation {
 						// add rotations to the shapes index
-						shapesIndex[shape.Rotate90().String()] = true
-						shapesIndex[shape.Rotate90().Rotate90().String()] = true
-						shapesIndex[shape.Rotate90().Rotate90().Rotate90().String()] = true
+						shapesIndex[shape.Rotate90().Normalize().String()] = true
+						shapesIndex[shape.Rotate90().Rotate90().Normalize().String()] = true
+						shapesIndex[shape.Rotate90().Rotate90().Rotate90().Normalize().String()] = true
 					}
 
 					uniqueShapes++
