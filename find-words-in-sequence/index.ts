@@ -1,18 +1,17 @@
-class TrieNode {
-  children: Map<string, TrieNode> = new Map();
+class WordTrie {
+  // Map of characters to child nodes
+  children: Map<string, WordTrie> = new Map();
 
   // Storing prefix is not required, but helps with debugging
   prefix: string = "";
 
-  // This could be a boolean since we're storing the prefix
+  // If the node represents a word, store the word. Otherwise
+  // it's undefined. This could be a boolean since we're storing
+  // the prefix
   word?: string;
-}
-
-class WordTrie {
-  root: TrieNode = new TrieNode();
 
   addWord(word: string) {
-    let node = this.root;
+    let node: WordTrie = this;
     let prefix = "";
 
     for (const char of word) {
@@ -21,7 +20,7 @@ class WordTrie {
       let child = node.children.get(char);
 
       if (!child) {
-        child = new TrieNode();
+        child = new WordTrie();
         child.prefix = prefix;
         node.children.set(char, child);
       }
@@ -43,7 +42,7 @@ class WordTrie {
     return trie;
   }
 
-  lookupChar(char: string, root: TrieNode) {
+  lookup(char: string, root: WordTrie) {
     return root.children.get(char);
   }
 }
@@ -54,28 +53,29 @@ export function findWords(input: string, words: string[]): string[] {
 
   // Maintain a list of root nodes, each representing a potential
   // match in the trie
-  const roots = new Set<TrieNode>();
+  const roots = new Set<WordTrie>();
 
   // Start searching from the root node
-  roots.add(trie.root);
+  roots.add(trie);
 
   for (const char of input) {
-    // iterate over a copy of the list of roots, because we
-    // modify the list in the loop
+    // Iterate over a *copy* of the set of roots, because we
+    // modify the set within the loop
     for (const root of [...roots.values()]) {
-      const child = trie.lookupChar(char, root);
+      const child = trie.lookup(char, root);
       if (child) {
         // If the child is a word ending, add the word to the results
         // and keep searching this path since it's possible for words
-        // to overlap
+        // to overlap. For example, RACE and RACECAR lie along the same
+        // path but count as two words.
         if (child.word) {
           foundWords.push(child.word);
         }
 
-        // Add the child as a root to continue searching this path
-        // in the trie
+        // Add the child to the set of roots to continue searching this
+        // path in the trie.
         roots.add(child);
-      } else if (root !== trie.root) {
+      } else if (root !== trie) {
         // Remote extra search roots if they hit a dead end
         roots.delete(root);
       }
