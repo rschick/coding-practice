@@ -46,9 +46,9 @@ class DirectedGraph<ItemType extends KeyedItem> {
   }
 
   dfs(startKey: string, visit: VisitFunction<ItemType>) {
-    const visited = new Map<string, boolean>();
+    const visited = new Set<string>();
     const stack = [startKey];
-    visited.set(startKey, true);
+    visited.add(startKey);
 
     for (;;) {
       const key = stack.pop();
@@ -57,9 +57,9 @@ class DirectedGraph<ItemType extends KeyedItem> {
       }
 
       for (const adjacentKey of this.adjacencies.get(key)?.values() || []) {
-        if (!visited.get(adjacentKey)) {
+        if (!visited.has(adjacentKey)) {
           stack.push(adjacentKey);
-          visited.set(adjacentKey, true);
+          visited.add(adjacentKey);
         }
       }
 
