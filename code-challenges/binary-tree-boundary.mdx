@@ -1,0 +1,159 @@
+# Problem
+
+The boundary of a binary tree is the concatenation of the root, the left boundary, the leaves ordered from left-to-right, and the reverse order of the right boundary.
+
+The left boundary is the set of nodes defined by the following: The root node's left child is in the left boundary. If the root does not have a left child, then the left boundary is empty. If a node is in the left boundary and has a left child, then the left child is in the left boundary. If a node is in the left boundary, has no left child, but has a right child, then the right child is in the left boundary. The leftmost leaf is not in the left boundary.
+
+The right boundary is similar to the left boundary, except it is the right side of the root's right subtree. Again, the leaf is not part of the right boundary, and the right boundary is empty if the root does not have a right child.
+
+The leaves are nodes that do not have any children. For this problem, the root is not a leaf.
+
+Given the root of a binary tree, return the values of its boundary.
+
+## Example 1:
+
+Input: root = [1,2,3,4,null,5,null]
+Output: [1,2,4,5,3]
+
+### Explanation:
+
+The left boundary consists of just 2 (because 4 is a leaf).
+The right boundary consists of just 3 (because 5 is a leaf).
+The leaves consist of two nodes, 4 and 5.
+
+## Example 2:
+
+Input: root = [1,2,3,4,null,6,7,null,5,null,null,null,8]
+Output: [1,2,4,5,6,8,7,3]
+
+### Explanation:
+
+The left boundary consists of 2 and 4. The leaves consist of 5, 6 and 8. The right boundary consists of 3 and 7.
+
+## Constraints:
+
+The number of nodes in the tree is in the range [1, 104].
+
+-1000 &lt;= Node.val &lt;= 1000
+
+# TypeScript Solution
+
+## Reconstructing the tree from the input
+
+The input format is an array of values, where the position in the array is the index of the "next" node, and the value is the value of the node. The tree needs to be reconstructed from the input first because no values are included in the array if the parent does not exist. The second example above demonstrates this case.
+
+We can represent the tree using another array that includes the values for all indexes in a breadth-first traversal, including missing children, so there are no gaps in level 4.
+
+Alternatively we could also represent the tree has a linked-node data structure, but for this solution I opted for an array representation.
+
+In an array representation, the index of the left and right child can be derived from the parent index using 2n+1 and 2n+2, where n is the parent index. You can derive the parent index from a child index using floor((n-1)/2).
+
+Create a depth-first traversal function, then construct the boundary using the root node and the results of three traversals:
+
+- traverse the left sub-tree and collect nodes that have a left child or a right child
+- traverse the entire tree and collect the leaves, nodes that have no children
+- traverse the right sub-tree and collect nodes that have a right child or a left child, using the "after" option so nodes are visited bottom up
+
+```typescript: index.ts
+function left(i: number) {
+  return i * 2 + 1
+}
+
+function right(i: number) {
+  return i * 2 + 2
+}
+
+function getParentIndex(n: number) {
+  return Math.floor((n - 1) / 2)
+}
+
+interface Options {
+  before?: (i: number, val: number) => void
+  after?: (i: number, val: number) => void
+}
+
+type ArrayTree = (number | null)[]
+
+// build an array tree from the input array
+function buildTree(input: ArrayTree) {
+  // include the root in the result
+  const result = [input[0]]
+
+  // track the index of the next node in the result
+  let next = 1
+
+  // iterate through all the remaining nodes, which are all children
+  for (let i = 1; i < input.length; i++) {
+    const val = input[i]
+
+    while (!result[getParentIndex(next)]) {
+      result.push(null)
+      next++
+    }
+
+    result.push(val)
+    next++
+  }
+
+  return result
+}
+
+// recursive implementation of depth-first search / traversal
+function dfs(tree: ArrayTree, i: number, options: Options) {
+  options.before && options.before(i, tree[i]!)
+
+  if (tree[left(i)]) {
+    dfs(tree, left(i), options)
+  }
+
+  if (tree[right(i)]) {
+    dfs(tree, right(i), options)
+  }
+
+  options.after && options.after(i, tree[i]!)
+}
+
+function boundary(tree: (number | null)[]) {
+  // collect values into the result array, starting with the root
+  const result: number[] = [tree[0]!]
+
+  // left boundary, top down so use before
+  dfs(tree, 1, {
+    before: (i, val) => {
+      if (tree[left(i)]) {
+        result.push(val!)
+      } else if (tree[right(i)]) {
+        result.push(val)
+      }
+    }
+  })
+
+  // leaves
+  dfs(tree, 0, {
+    before: (i, val) => {
+      if (!tree[left(i)] && !tree[right(i)]) {
+        result.push(val)
+      }
+    }
+  })
+
+  // right boundary, bottom up so use after
+  dfs(tree, 2, {
+    after: (i, val) => {
+      if (tree[right(i)]) {
+        result.push(val)
+      } else if (tree[left(i)]) {
+        result.push(val)
+      }
+    }
+  })
+
+  return result
+}
+
+// console.log(buildTree([1, 2, 3, 4, null, 6, 7, null, 5, null, null, null, 8]))
+
+console.log(boundary(buildTree([1, 2, 3, 4, null, 5, null])))
+
+console.log(boundary(buildTree([1, 2, 3, 4, null, 6, 7, null, 5, null, null, null, 8])))
+```

@@ -1,0 +1,45 @@
+```javascript
+const assert = require('assert')
+
+// Your previous Plain Text content is preserved below:
+
+// Hello! Your interview question is below. Write code in this pad just like you would normally – your AI Interviewer will be able to see it.
+
+// Given an unsorted array of unique integers (size n + 1) and a first array identical to the second array but missing one integer (size n), find and output the missing integer.
+
+// Examples:
+// Input: list1 = [1, 2, 3, 4] list2 = [1, 2, 3, 4, 5] Output: 5
+
+// Input: [], [1] Output: 1
+
+// Constraints:
+// -inf ≤ n ≤ inf
+// All entries are unique
+// length(list2) - length(list1) == 1
+
+function findMissing(list1, list2) {
+  assert(Array.isArray(list1), 'list1 must be an array')
+  assert(Array.isArray(list2), 'list2 must be an array')
+  assert(
+    list2.length - list1.length === 1,
+    'list2 must include one more element than list1'
+  )
+  const sum1 = list1.reduce((total, current) => total + current, 0)
+  const sum2 = list2.reduce((total, current) => total + current, 0)
+
+  return sum2 - sum1
+}
+
+function test(success, name) {
+  console.log(success ? `${name} succeeded` : `${name} failed`)
+}
+
+test(findMissing([1, 2, 3, 4], [1, 2, 3, 4, 5]) === 5, 'test case 1')
+test(findMissing([], [1]) === 1, 'test case 2')
+
+try {
+  findMissing([1], [])
+} catch (err) {
+  test(err.name === 'AssertionError', 'test case 3')
+}
+```

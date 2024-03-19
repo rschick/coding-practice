@@ -1,0 +1,75 @@
+```javascript
+// Your previous Plain Text content is preserved below:
+
+// Hello! Your interview question is below. Write code in this pad just like you would normally – your AI Interviewer will be able to see it.
+
+// Given an input string s and a pattern p, implement regular expression matching with support for '.' and '*' where:
+
+// '.' Matches any single character.
+// '*' Matches zero or more of the preceding element.
+// The matching should cover the entire input string (not partial).
+
+// Example 1:
+// Input: s = "aa", p = "a"
+// Output: false
+// Explanation: "a" does not match the entire string "aa".
+
+// Example 2:
+// Input: s = "aa", p = "a*"
+// Output: true
+// Explanation: '*' means zero or more of the preceding element, 'a'. Therefore, by repeating 'a' once, it becomes "aa".
+
+// Example 3:
+// Input: s = "ab", p = ".*"
+// Output: true
+// Explanation: ".*" means "zero or more (*) of any character (.)".
+
+// Constraints:
+// 1 <= s.length <= 20
+// 1 <= p.length <= 20
+// s contains only lowercase English letters.
+// p contains only lowercase English letters, '.', and '*'.
+// It is guaranteed for each appearance of the character '*', there will be a previous valid character to match.
+
+function match(s, p) {
+  let i = 0
+
+  for (const c of s) {
+    if (c === p[i]) {
+      // c matches exactly
+      i++
+    } else if (p[i] === '.') {
+      // c matches dot
+      if (p[i + 1] !== '*') {
+        i++
+      }
+    } else if (p[i] === '*') {
+      if (c === p[i - 1] || p[i - 1] === '.') {
+        // matches previous char
+      } else if (c === p[i + 1]) {
+        // matches next char
+        i += 2
+      } else {
+        // no match after star
+        return false
+      }
+    } else {
+      // no match
+      return false
+    }
+  }
+
+  return true
+}
+
+console.assert(match('aa', 'a') === false)
+console.assert(match('aa', 'a*') === true)
+console.assert(match('ab', '.*') === true)
+console.assert(match('russell', 'r.s*el*') === true)
+console.assert(match('russell', 'russell') === true)
+console.assert(match('russell', '.*') === true)
+console.assert(match('russellllllll', 'russel*') === true)
+console.assert(match('russelllllllle', 'ru..el*') === false)
+
+console.log('success')
+```
